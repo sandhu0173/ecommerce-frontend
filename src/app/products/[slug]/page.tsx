@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { productApi, cartApi } from '@/lib/api'
 import { useAuth } from '@/lib/auth-context'
 import Header from '@/components/Header'
+import AuthModal from '@/components/AuthModal'
 
 interface CartItem {
   id: number
@@ -47,6 +48,7 @@ export default function ProductPage() {
   const [addingToCart, setAddingToCart] = useState(false)
   const [addToCartMessage, setAddToCartMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [isProductInCart, setIsProductInCart] = useState(false)
+  const [showAuthModal, setShowAuthModal] = useState(false)
 
   // Generate dummy image URL based on product ID
   const getDummyImage = (productId: number, variation: number = 0) => {
@@ -91,7 +93,7 @@ export default function ProductPage() {
 
   const handleAddToCart = async () => {
     if (!user) {
-      router.push('/auth/login')
+      setShowAuthModal(true)
       return
     }
 
@@ -390,6 +392,16 @@ export default function ProductPage() {
           <p>&copy; 2026 Store. All rights reserved.</p>
         </div>
       </footer>
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onSuccess={() => {
+          setShowAuthModal(false)
+          checkIfProductInCart()
+        }}
+      />
     </div>
   )
 }

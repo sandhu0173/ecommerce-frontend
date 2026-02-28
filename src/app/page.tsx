@@ -6,6 +6,7 @@ import { productApi, cartApi } from '@/lib/api'
 import { useAuth } from '@/lib/auth-context'
 import { useRouter } from 'next/navigation'
 import Header from '@/components/Header'
+import AuthModal from '@/components/AuthModal'
 
 interface Product {
   id: number
@@ -28,6 +29,7 @@ export default function Home() {
   const [productsInCart, setProductsInCart] = useState<Set<number>>(new Set())
   const [cartSuccess, setCartSuccess] = useState('')
   const [error, setError] = useState('')
+  const [showAuthModal, setShowAuthModal] = useState(false)
 
   useEffect(() => {
     fetchProducts()
@@ -74,7 +76,7 @@ export default function Home() {
     e.stopPropagation()
 
     if (!isAuthenticated) {
-      router.push('/auth/login')
+      setShowAuthModal(true)
       return
     }
 
@@ -231,7 +233,7 @@ export default function Home() {
                     ) : (
                       <button
                         onClick={(e) => handleAddToCart(product.id, e)}
-                        disabled={addingToCart === product.id || product.stock === 0 || !isAuthenticated}
+                        disabled={addingToCart === product.id || product.stock === 0}
                         className="w-full py-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg font-semibold text-sm hover:from-blue-500 hover:to-cyan-500 transition-all group-hover:shadow-lg group-hover:shadow-blue-500/30 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <i className={`fas ${addingToCart === product.id ? 'fa-spinner animate-spin' : 'fa-shopping-cart'}`}></i>
@@ -383,6 +385,16 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onSuccess={() => {
+          setShowAuthModal(false)
+          fetchCartProducts()
+        }}
+      />
     </div>
   )
 }
