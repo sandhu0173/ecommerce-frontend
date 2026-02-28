@@ -37,7 +37,7 @@ export default function ProductsPage() {
   const [error, setError] = useState('')
   const [search, setSearch] = useState('')
   const [sortBy, setSortBy] = useState('created_at')
-  const [priceRange, setPriceRange] = useState(PRICE_RANGES[0])
+  const [priceRange, setPriceRange] = useState(PRICE_RANGES[0]!)
   const [showFilters, setShowFilters] = useState(false)
   const [addingToCart, setAddingToCart] = useState<number | null>(null)
   const [productsInCart, setProductsInCart] = useState<Set<number>>(new Set())
@@ -49,7 +49,7 @@ export default function ProductsPage() {
     try {
       const response = await cartApi.getCart()
       const cartItems = response.data.data.items || []
-      const productIds = new Set(cartItems.map((item: any) => item.product_id))
+      const productIds = new Set<number>(cartItems.map((item: any) => item.product_id))
       setProductsInCart(productIds)
     } catch (err) {
       console.error('Failed to fetch cart:', err)

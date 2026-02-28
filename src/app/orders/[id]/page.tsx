@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/lib/auth-context'
 import { orderApi } from '@/lib/api'
@@ -50,10 +50,11 @@ interface OrderData {
   delivered_at: string | null
 }
 
-export default function OrderPage({ params }: { params: { id: string } }) {
+export default function OrderPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { user, isLoading: authLoading } = useAuth()
+  const params = useParams()
+  const { user, loading: authLoading } = useAuth()
   const [order, setOrder] = useState<OrderData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -70,7 +71,12 @@ export default function OrderPage({ params }: { params: { id: string } }) {
     const fetchOrder = async () => {
       try {
         setLoading(true)
-        const response = await orderApi.show(params.id)
+        const orderId = Array.isArray(params.id) ? params.id[0] : (params.id as string)
+        if (!orderId) {
+          setError('Invalid order ID')
+          return
+        }
+        const response = await orderApi.show(orderId)
         setOrder(response.data.data)
       } catch (err: any) {
         setError(err.response?.data?.message || 'Failed to load order')
@@ -80,7 +86,7 @@ export default function OrderPage({ params }: { params: { id: string } }) {
     }
 
     fetchOrder()
-  }, [authLoading, user, router, params.id])
+  }, [authLoading, user, router, params])
 
   if (authLoading || loading) {
     return (
